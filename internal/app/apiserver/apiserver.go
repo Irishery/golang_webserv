@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Irishery/golang_webserv.git/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -16,6 +17,7 @@ type APIserver struct {
 	config *Config
 	router *mux.Router
 	logger *logrus.Logger
+	store  *store.Store
 }
 
 // New ...
@@ -35,6 +37,10 @@ func (s *APIserver) Start() error {
 
 	s.configureRouter()
 
+	if err := s.configureStore(); err != nil {
+		return err
+	}
+
 	s.logger.Info("starting api server")
 
 	go s.grabeData(10 * time.Second)
@@ -48,6 +54,17 @@ func (s *APIserver) configureLogger() error {
 	}
 
 	s.logger.SetLevel(level)
+
+	return nil
+}
+
+func (s *APIserver) configureStore() error {
+	st := store.New(s.config.Store)
+	if err := st.Open(); err != nil {
+		return err
+	}
+
+	s.store = st
 
 	return nil
 }
