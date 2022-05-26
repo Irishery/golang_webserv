@@ -8,8 +8,9 @@ import (
 
 // Store ...
 type Store struct {
-	config *Config
-	db     *sql.DB
+	config             *Config
+	db                 *sql.DB
+	currencyRepository *CurrencyRepository
 }
 
 // New ..
@@ -38,4 +39,17 @@ func (s *Store) Open() error {
 // Close ...
 func (s *Store) Close() {
 	s.db.Close()
+}
+
+// Currency ...
+func (s *Store) Currency() *CurrencyRepository {
+	if s.currencyRepository != nil {
+		return s.currencyRepository
+	}
+
+	s.currencyRepository = &CurrencyRepository{
+		store: s,
+	}
+
+	return s.currencyRepository
 }

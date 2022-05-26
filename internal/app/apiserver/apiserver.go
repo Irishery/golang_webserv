@@ -3,7 +3,6 @@ package apiserver
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -35,11 +34,11 @@ func (s *APIserver) Start() error {
 		return err
 	}
 
-	s.configureRouter()
-
 	if err := s.configureStore(); err != nil {
 		return err
 	}
+
+	s.configureRouter()
 
 	s.logger.Info("starting api server")
 
@@ -70,23 +69,29 @@ func (s *APIserver) configureStore() error {
 }
 
 func (s *APIserver) configureRouter() {
-	s.router.HandleFunc("/hello", s.handleHello())
+	s.router.HandleFunc("/", s.MainPart())
 	s.router.HandleFunc("/get_info", s.getCurInfo())
 }
 
-func (s *APIserver) handleHello() http.HandlerFunc {
+func (s *APIserver) MainPart() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello")
+		http.Redirect(w, r, "/get_info", http.StatusFound)
 	}
 }
 
 func (s *APIserver) getCurInfo() http.HandlerFunc {
-	jsonstring, err := json.Marshal(MakeRequest())
+	cur_array, err := s.store.Currency().GetAll()
 	if err != nil {
 		s.logger.Error(err)
 		return nil
+	}
 
+	jsonstring, err := json.Marshal(cur_array)
+	if err != nil {
+		s.logger.Error(err)
+		return nil
 	} else {
+		s.logger.Info("Server has sent currency info")
 		return func(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(w, string(jsonstring))
 		}
@@ -95,6 +100,7 @@ func (s *APIserver) getCurInfo() http.HandlerFunc {
 
 func (s *APIserver) grabeData(d time.Duration) {
 	for range time.Tick(d) {
-		log.Print("Grabber has done some stuff")
+		data := MakeRequest()
+		go s.store.Currency().CreateMany(data)
 	}
 }

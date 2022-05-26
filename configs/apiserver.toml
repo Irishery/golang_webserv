@@ -2,4 +2,4 @@ bind_addr = ":8080"
 log_level = "debug"
 
 [store]
-database_url = "host=localhost dbname=golang_webserv sslmode=disable"
+database_url = "user=postgres password=pas277 host=localhost dbname=currency_info sslmode=disable"
