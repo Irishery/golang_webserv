@@ -2,7 +2,9 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // ...
 )
 
@@ -22,7 +24,16 @@ func New(config *Config) *Store {
 
 // Open ...
 func (s *Store) Open() error {
-	db, err := sql.Open("postgres", s.config.DatabaseURL)
+	err := godotenv.Load()
+	if err != nil {
+		return err
+	}
+
+	var databaseURL string = fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=%s",
+		s.config.POSTGRES_USER, s.config.POSTGRES_PASSWORD,
+		s.config.DATABASE_HOST, s.config.POSTGRES_DB, s.config.SSL_MODE)
+
+	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		return err
 	}

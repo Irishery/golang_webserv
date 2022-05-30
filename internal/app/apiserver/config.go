@@ -4,8 +4,8 @@ import "github.com/Irishery/golang_webserv.git/internal/app/store"
 
 // Config ...
 type Config struct {
-	BindAddr string `toml:"bind_addr"`
-	LogLevel string `toml:"log_level"`
+	BindAddr string `env:"BIND_ADDR,notEmpty"`
+	LogLevel string `env:"LOG_LEVEL,notEmpty"`
 	Store    *store.Config
 }
 

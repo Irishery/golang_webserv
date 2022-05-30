@@ -12,26 +12,25 @@ type CurrencyRepository struct {
 }
 
 // Create ...
-func (r *CurrencyRepository) Create(c *model.Currency) (*model.Currency, error) {
+func (r *CurrencyRepository) Create(cur *model.Currency) (*model.Currency, error) {
 	if err := r.store.db.QueryRow(
 		"INSERT INTO currency (symbol, price, volume, last_trade) VALUES ($1, $2, $3, $4) RETURNING id",
-		c.Symbol,
-		c.Price,
-		c.Volume,
-		c.LastTrade,
-	).Scan(&c.ID); err != nil {
+		cur.Symbol,
+		cur.Price,
+		cur.Volume,
+		cur.LastTrade,
+	).Scan(&cur.ID); err != nil {
 		return nil, err
 	}
 
-	return c, nil
+	return cur, nil
 }
 
 // CreateMany ...
-func (r *CurrencyRepository) CreateMany(cur_array []*model.Currency) ([]*model.Currency, error) {
-	for _, cur := range cur_array {
+func (r *CurrencyRepository) CreateMany(curArray []*model.Currency) ([]*model.Currency, error) {
+	for _, cur := range curArray {
 		_, err := r.FindBySymbol(cur.Symbol)
 		if err != nil {
-			log.Print(err)
 			_, err = r.Create(cur)
 			if err != nil {
 				log.Print(err)
@@ -42,30 +41,30 @@ func (r *CurrencyRepository) CreateMany(cur_array []*model.Currency) ([]*model.C
 				log.Print(err)
 			}
 		}
-
 	}
 
-	return cur_array, nil
+	return curArray, nil
 }
 
 // Update ...
-func (r *CurrencyRepository) Update(c model.Currency) (*model.Currency, error) {
+func (r *CurrencyRepository) Update(sur model.Currency) (*model.Currency, error) {
 	if err := r.store.db.QueryRow(
 		"UPDATE currency SET price=$2, volume=$3, last_trade=$4 WHERE symbol=$1 RETURNING  price, volume, last_trade",
-		c.Symbol,
-		c.Price,
-		c.Volume,
-		c.LastTrade,
+		sur.Symbol,
+		sur.Price,
+		sur.Volume,
+		sur.LastTrade,
 	).Scan(
-		&c.Price,
-		&c.Volume,
-		&c.LastTrade,
+		&sur.Price,
+		&sur.Volume,
+		&sur.LastTrade,
 	); err != nil {
 		log.Print(err)
+
 		return nil, err
 	}
 
-	return &c, nil
+	return &sur, nil
 }
 
 // FindBySymbol ...
@@ -95,19 +94,19 @@ func (r *CurrencyRepository) GetAll() (map[string]model.CurrencyOutput, error) {
 	}
 	defer rows.Close()
 
-	cur_array := make(map[string]model.CurrencyOutput)
+	curArray := make(map[string]model.CurrencyOutput)
 
 	for rows.Next() {
-		var raw_cur model.Currency
-		if err := rows.Scan(&raw_cur.ID, &raw_cur.Symbol, &raw_cur.Price, &raw_cur.Volume,
-			&raw_cur.LastTrade); err != nil {
+		var rawCur model.Currency
+		if err := rows.Scan(&rawCur.ID, &rawCur.Symbol, &rawCur.Price, &rawCur.Volume,
+			&rawCur.LastTrade); err != nil {
 			return nil, err
 		}
 
-		cur_array[raw_cur.Symbol] = model.CurrencyOutput{
-			Price:     raw_cur.Price,
-			Volume:    raw_cur.Volume,
-			LastTrade: raw_cur.LastTrade,
+		curArray[rawCur.Symbol] = model.CurrencyOutput{
+			Price:     rawCur.Price,
+			Volume:    rawCur.Volume,
+			LastTrade: rawCur.LastTrade,
 		}
 	}
 
@@ -115,5 +114,5 @@ func (r *CurrencyRepository) GetAll() (map[string]model.CurrencyOutput, error) {
 		return nil, err
 	}
 
-	return cur_array, nil
+	return curArray, nil
 }

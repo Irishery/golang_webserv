@@ -1,0 +1,33 @@
+linters:
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - style
+    - test
+    - unused
+  disable:
+    - exhaustivestruct
+    - golint     # deprecated
+    - scopelint  # deprecated
+    - interfacer # deprecated
+    - maligned   # deprecated
+
+issues:
+  exclude-rules:
+    - path: _test.go # tests can be big with long inputs
+      linters:
+        - funlen
+        - lll
+
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default

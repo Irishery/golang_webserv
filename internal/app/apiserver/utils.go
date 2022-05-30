@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,11 +16,9 @@ func MakeRequest() []*model.Currency {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
 
 	if err != nil {
 		log.Fatalln(err)
@@ -30,7 +27,7 @@ func MakeRequest() []*model.Currency {
 	err = json.Unmarshal(body, &input_data)
 
 	if err != nil {
-		fmt.Printf("err = %v\n", err)
+		log.Fatalln(err)
 	}
 
 	return input_data
