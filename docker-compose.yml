@@ -1,0 +1,91 @@
+version: '3.3'
+services:
+  app:
+    container_name: golang_container
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_HOST=${DB_HOST}
+      - DATABASE_PORT=${DB_PORT}
+      - TEST_POSTGRES_USER=${TEST_DB_USER}
+      - TEST_POSTGRES_PASSWORD=${TEST_DB_PASSWORD}
+      - TEST_POSTGRES_DB=${TEST_DB_NAME}
+      - TEST_DATABASE_HOST=${TEST_DB_HOST}
+      - TEST_DATABASE_PORT=${TEST_DB_PORT}
+    tty: true
+    build: .
+    ports:
+      - 8000:8080
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      - postgresdb
+    networks:
+      - learning
+
+  postgresdb:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_HOST=${DB_HOST}
+    ports:
+      - '1234:5432'
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    networks:
+      - learning
+    
+  migrate1:
+    # change it to your path
+    image: migrate/migrate
+    volumes:
+        - /home/kir/projects/golang_webserv/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable", "up"]
+    links: 
+        - postgresdb
+    depends_on:
+      - postgresdb
+    networks:
+      - learning
+
+  postgresdb_test:
+    image: postgres:latest
+    container_name: postgres_test_container
+    environment:
+      - POSTGRES_USER=${TEST_DB_USER}
+      - POSTGRES_PASSWORD=${TEST_DB_PASSWORD}
+      - POSTGRES_DB=${TEST_DB_NAME}
+      - DATABASE_HOST=${TEST_DB_HOST}
+    ports:
+      - '4568:5432'
+    volumes:
+      - ./pg_data_test:/var/lib/postgresql/data
+    networks:
+      - learning
+
+  migrate2:
+    image: migrate/migrate
+    volumes:
+        # change it to your path
+        - /home/kir/projects/golang_webserv/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://${TEST_DB_USER}:${TEST_DB_PASSWORD}@${TEST_DB_HOST}:5432/${TEST_DB_NAME}?sslmode=disable", "up"]
+    links: 
+        - postgresdb_test
+    depends_on:
+      - postgresdb_test
+    networks:
+      - learning
+
+volumes:
+  pg_data:
+  pg_data_test:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  learning:
+    driver: bridge

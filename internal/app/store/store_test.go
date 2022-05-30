@@ -1,6 +1,7 @@
 package store_test
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -24,7 +25,9 @@ func TestMain(m *testing.M) {
 
 	databaseURL = os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = "user=postgres password=pas277 host=localhost dbname=currency_info_test sslmode=disable"
+		databaseURL = fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v",
+			config.POSTGRES_USER, config.POSTGRES_PASSWORD,
+			config.DATABASE_HOST, config.DATABASE_PORT, config.POSTGRES_DB, config.SSL_MODE)
 	}
 
 	os.Exit(m.Run())

@@ -29,9 +29,9 @@ func (s *Store) Open() error {
 		return err
 	}
 
-	var databaseURL string = fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=%s",
+	var databaseURL string = fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v",
 		s.config.POSTGRES_USER, s.config.POSTGRES_PASSWORD,
-		s.config.DATABASE_HOST, s.config.POSTGRES_DB, s.config.SSL_MODE)
+		s.config.DATABASE_HOST, s.config.DATABASE_PORT, s.config.POSTGRES_DB, s.config.SSL_MODE)
 
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {

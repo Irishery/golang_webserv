@@ -43,6 +43,8 @@ func (r *CurrencyRepository) CreateMany(curArray []*model.Currency) ([]*model.Cu
 		}
 	}
 
+	log.Print("Data has been updated")
+
 	return curArray, nil
 }
 

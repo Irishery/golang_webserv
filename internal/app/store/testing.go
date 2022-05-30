@@ -24,7 +24,6 @@ func TestStore(t *testing.T, databaseURL string) (*Store, func(...string)) {
 		log.Fatalf("%+v", err)
 	}
 
-	// config.DatabaseURL = databaseURL
 	store := New(config)
 	if err := store.Open(); err != nil {
 		t.Fatal(err)

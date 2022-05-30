@@ -8,10 +8,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var (
-	configPath string
-)
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
